@@ -1,52 +1,54 @@
 # 语法参考
 
-ASON 文本格式的完整参考文档。
+ASON 文本格式的完整参考。
 
 ## 文档结构
 
-每个 ASON 文档的形式为：
+每个文档都遵循这个形态：
 
-```
+```text
 schema ":" data
 ```
 
-- **Schema** —— 用 `{ }` 包裹，定义字段名和可选类型提示
-- **冒号** —— 分隔 Schema 与数据
-- **Data** —— 一个或多个用 `( )` 包裹的元组
+- `schema` 使用 `{...}`
+- `data` 使用元组 `(...)`
+- 列表是一个 schema 对应多行元组
 
 ## Schema
 
 ```ason
-{field1, field2, field3}
-{field1:type1, field2:type2}
+{id, name, active}
+{id:int, name:str, active:bool}
 ```
 
-字段以逗号分隔，类型注解可选，字段名前后的空白被忽略。
+文本模式下，类型注解是可选的。
 
-### 支持的类型注解
+### 常见类型注解
 
 | 注解 | 含义 |
 |------|------|
-| `int` | 整数（任意 `i64` 范围值） |
-| `float` | IEEE 754 双精度浮点 |
-| `str` | 字符串（带引号或不带引号） |
-| `bool` | 布尔值（`true` / `false`） |
-| `{...}` | 嵌套结构体 Schema |
-| `[type]` | `type` 类型的数组 |
+| `int` | 整数 |
+| `float` | 浮点数 |
+| `str` | 字符串 |
+| `bool` | 布尔值 |
+| `{...}` | 嵌套结构体 |
+| `[type]` | 数组 |
+| `<K:V>` | 映射 |
 
-## 数据元组
+## 元组
 
 ```ason
-(value1, value2, value3)
+(1, Alice, true)
 ```
 
-值以逗号分隔，必须与 Schema 顺序对应。值前后的空白被去除。多个元组以逗号分隔：
+值按 schema 顺序排列。
+
+列表写法是一个 schema 对应多行元组：
 
 ```ason
 [{id:int, name:str}]:
   (1, Alice),
-  (2, Bob),
-  (3, Carol)
+  (2, Bob)
 ```
 
 ## 标量值
@@ -55,21 +57,16 @@ schema ":" data
 
 ```ason
 42
--100
+-7
 0
 ```
-
-任意 `i64` 范围内的值，十进制表示，可有前置 `-`，禁止前置零。
 
 ### 浮点数
 
 ```ason
 3.14
 -0.5
-1e10
 ```
-
-IEEE 754 双精度，支持科学计数法，不支持 `NaN` 和 `Inf`（用空槽表示 null）。
 
 ### 布尔值
 
@@ -78,88 +75,72 @@ true
 false
 ```
 
-严格小写，区分大小写。
+### Null / Optional
 
-### Null / None
-
-空槽 —— 两个逗号之间（或逗号与右括号之间）没有任何字符：
+空槽表示 null 或缺失值：
 
 ```ason
-[{id, name, score}]:
-  (1, Alice, 9.5),
-  (2, Bob,      )
+[{id:int, label:str}]:
+  (1, hello),
+  (2,      )
 ```
 
-Bob 的 score 为 null / None。
+### 字符串
 
-### 不带引号的字符串
-
-不包含 `,`、`(`、`)`、`[`、`]`、`\` 的 Unicode 字符序列。解析器自动去除首尾 ASCII 空白：
+当字符串不包含保留语法字符时，可以不加引号：
 
 ```ason
-Alice Smith
+Alice
 hello world
 ```
 
-### 带引号的字符串
-
-用双引号包裹，可保留空白或包含保留字符：
+需要保留空白或包含保留字符时使用引号：
 
 ```ason
-"  leading spaces  "
 "value with, comma"
-"line\nnewline"
+"  leading spaces  "
+"line\nbreak"
 ```
-
-带引号字符串内的转义序列：
-
-| 转义 | 含义 |
-|------|------|
-| `\\` | 字面反斜杠 |
-| `\"` | 双引号 |
-| `\n` | 换行 |
-| `\t` | 制表符 |
-| `\r` | 回车 |
-| `\,` | 字面逗号（不带引号的上下文） |
 
 ## 嵌套结构
 
-嵌套对象用嵌套 Schema 和嵌套元组表示：
-
 ```ason
-[{id:int, address:{city:str, zip:str}}]:
-  (1, (Berlin, 10115)),
-  (2, (Paris,  75001))
+[{name:str, dept:{title:str}}]:
+  (Alice, (Engineering)),
+  (Bob,   (Platform))
 ```
 
 ## 数组
 
-数组字段在 Schema 和数据中均使用 `[...]`：
-
 ```ason
-[{id:int, tags:[str]}]:
-  (1, [rust, go]),
-  (2, [python, c++])
+[{name:str, scores:[int]}]:
+  (Alice, [90, 85, 92]),
+  (Bob,   [76, 88])
 ```
 
-数组可以为空：
+## 映射
 
 ```ason
-(1, [])
+[{name:str, attrs:<str:int>}]:
+  (Alice, <age:30, score:95>)
 ```
 
-## 枚举
+## 注释
 
-枚举变体使用 `变体::值` 形式：
+ASON 支持块注释：
 
 ```ason
-Role::Admin
-Status::Active
+/* user list schema */
+[{id:int, name:str}]:
+  (1, Alice),
+  (2, Bob)
 ```
 
-## 单结构体简写
+行注释不是格式的一部分。
 
-序列化单个结构体（非列表）时，Schema 和数据可省略换行，写在同一行：
+## 单值写法
+
+单个值可以写成单行形式：
 
 ```ason
 {id:int, name:str, active:bool}:(1, Alice, true)
@@ -167,6 +148,6 @@ Status::Active
 
 ## 空白规则
 
-- Token 之间的空白被忽略
-- 不带引号的字符串值首尾空白被去除
-- 元组之间的换行可选，但推荐加上以提高可读性
+- token 之间的空白会被忽略
+- 不带引号的字符串会自动 trim
+- 推荐使用多行美化布局，但不是必须

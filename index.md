@@ -4,7 +4,7 @@ layout: home
 hero:
   name: "ASON"
   text: "Array-Schema Object Notation"
-  tagline: "65% fewer tokens than JSON. 7–10× faster binary. Human-readable. LLM-native."
+  tagline: "Fewer tokens than JSON. Compact schema-first rows. Human-readable. LLM-native."
   image:
     src: /logo.svg
     alt: ASON
@@ -22,47 +22,46 @@ hero:
 features:
   - icon: 🚀
     title: 65% Token Reduction
-    details: Schema is declared once. Data rows carry only values — no repeated keys. Ideal for LLM context windows and API cost reduction.
+    details: Schema is declared once. Data rows carry only values, not repeated keys. Ideal for LLM context windows and lower API cost.
     link: /guide/why-ason
     linkText: See comparison
 
   - icon: ⚡
-    title: 7–10× Faster Binary
-    details: ASON-BIN uses zero-copy deserialization and SIMD acceleration. Serialization is up to 7.7× faster than JSON with 39% smaller payloads.
+    title: Parsing That Scales
+    details: ASON removes repeated key matching and lets decoders follow schema order. Actual speedups depend on language, runtime, payload shape, and implementation maturity.
     link: /reference/performance
-    linkText: Benchmark results
+    linkText: Performance notes
 
   - icon: 🧠
     title: LLM-Native Design
-    details: Row-oriented syntax with schema separation is easy for language models to generate and parse. Reduces hallucination in structured output.
+    details: Row-oriented syntax with schema separation is easier for language models to generate and validate than repeated JSON objects.
     link: /guide/llm-integration
     linkText: LLM integration
 
   - icon: 📖
     title: Human-Readable
-    details: Clean Markdown-like syntax. No quotes around most values. Vertically aligned rows for easy scanning. High signal-to-noise ratio.
+    details: Clean, compact syntax. Most strings do not need quotes. Lists read like tables instead of nested braces.
     link: /reference/syntax
     linkText: Syntax reference
 
   - icon: 🌐
     title: Multi-Language
-    details: Official libraries for Rust, Go, Python, C, C++, Java, and Zig. Consistent API design across all implementations.
+    details: Official implementations cover Rust, Go, Python, C, C++, Java, and Zig, with shared cross-language compatibility tests.
     link: /languages/rust
     linkText: Language guides
 
   - icon: 🔧
-    title: Drop-in Tooling
-    details: VS Code extension with syntax highlighting and live preview. LSP server for editor integration. Spec-compliant cross-language test suite.
-    link: /guide/getting-started
-    linkText: Setup tools
+    title: Tooling and Spec
+    details: Formal specification, syntax highlighting, editor tooling, and compatibility matrices keep implementations aligned.
+    link: /spec
+    linkText: Read the spec
 ---
 
 <div class="vp-doc" style="max-width:900px;margin:0 auto;padding:2rem 1.5rem">
 
-## ASON vs JSON — at a glance
+## ASON vs JSON
 
 ```json
-// JSON — ~100 tokens
 {
   "users": [
     { "id": 1, "name": "Alice", "active": true },
@@ -73,34 +72,44 @@ features:
 ```
 
 ```ason
-// ASON — ~35 tokens  (65% savings)
 [{id:int, name:str, active:bool}]:
   (1, Alice, true),
   (2, Bob,   false),
   (3, Carol, true)
 ```
 
-Schema is written **once**. Every row after `:` is pure data — comma-separated values in a tuple `(...)`. No repeated keys, no extra quotes, no noise.
+Schema is written once. Each row after `:` is pure data. That is where most of ASON's token and parsing advantage comes from.
 
 ## Quick Install
 
 ::: code-group
 
 ```toml [Rust]
-# Cargo.toml
 [dependencies]
 ason = "0.1"
 serde = { version = "1", features = ["derive"] }
 ```
 
 ```bash [Go]
-go get github.com/ason-lab/ason/go
+go get github.com/ason-lab/ason-go
 ```
 
 ```bash [Python]
-# copy ason.py into your project (stdlib only, zero dependencies)
+cd ason-py
+python3 -m pip install -e .
 ```
 
 :::
+
+## Performance
+
+ASON has a structural advantage over JSON on repeated, schema-shaped data, but the multiplier is not universal across languages.
+
+- Native implementations usually show the strongest gains.
+- Managed runtimes can still be highly competitive.
+- Dynamic runtimes often benefit on repetitive rows, but less consistently.
+- Small single-object payloads may show little or no win for text mode.
+
+Use the [performance overview](/reference/performance) for the model, and [benchmark notes](/reference/benchmark-notes) for implementation-specific context.
 
 </div>

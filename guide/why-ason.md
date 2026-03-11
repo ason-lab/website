@@ -30,7 +30,7 @@ JSON repeats field names for every object in an array. With 1 000 rows and 5 fie
 | 1 000 flat structs (8 fields) | 121 675 B | 56 716 B | 74 454 B | **53%** |
 | 100 deep nested structs (5 levels) | 438 112 B | 174 611 B | 225 434 B | **60%** |
 
-## 2. Parse Performance
+## 2. Parsing Advantage
 
 ### Zero Key-Hashing
 
@@ -42,23 +42,40 @@ ASON parsers build a **positional index** once from the schema (`field 0 → id`
 
 JSON parsers dynamically infer types by peeking at the next character (`"`, `t`, `f`, `[`, `{`, digit). This causes CPU branch mispredictions.
 
-ASON parsers know field types from the schema: they call `parse_int()` or `parse_str()` directly — no dynamic inference, no mispredictions.
+ASON parsers know field types from the schema: they can go straight to the expected parse path instead of rediscovering structure on every row.
 
-### Benchmark (Apple M-series, `--release`)
+### Performance Depends on the Implementation
 
-**Flat struct (8 fields, × 1 000)**
+The important point is not that every ASON implementation has the same multiplier over JSON. They do not.
 
-| Test | JSON | ASON Text | ASON-BIN | BIN vs JSON |
-|------|------|-----------|----------|-------------|
-| Serialize | 2.19 ms | 1.07 ms | **0.28 ms** | **7.7×** |
-| Deserialize | 6.05 ms | 5.10 ms | **2.96 ms** | **2.0×** |
+Actual results vary based on:
 
-**Deep struct (5-level nested, × 100)**
+- language and runtime
+- implementation maturity
+- text vs binary format
+- flat rows vs deeply nested payloads
+- payload size
+- allocation strategy
+- benchmark methodology
 
-| Test | JSON | ASON Text | ASON-BIN | BIN vs JSON |
-|------|------|-----------|----------|-------------|
-| Serialize | 4.19 ms | 2.67 ms | **0.50 ms** | **8.4×** |
-| Deserialize | 9.37 ms | 8.55 ms | **3.72 ms** | **2.5×** |
+What stays consistent across implementations is the model:
+
+- the schema is parsed once
+- rows carry only values
+- decoding can follow schema order instead of rediscovering keys each time
+
+In practice, that usually means:
+
+| Implementation style | Typical outcome |
+|----------------------|-----------------|
+| Native/system languages (Rust, C, C++, Go, Zig) | Strongest speedups, especially on binary and large repeated rows |
+| Managed runtimes (Java, C#) | Usually strong results, often competitive with native for real workloads |
+| VM/dynamic runtimes (JavaScript, Python) | Can still be very competitive, especially on repetitive structured data |
+| Less mature ports | May lag until the parser and allocator paths are tuned |
+
+So the website should treat performance as **implementation-specific** and **workload-specific**, not as one universal multiplier.
+
+If you want hard numbers, show them per language guide or per benchmark page, not as a single site-wide parse claim.
 
 ## 3. LLM Output Quality
 
@@ -90,10 +107,9 @@ Columns line up naturally when padded. The schema acts as a header row — famil
 | Human-readable | ✅ | ✅ | ❌ |
 | Token-efficient | ❌ | ✅ | N/A |
 | Schema separation | ❌ | ✅ | ✅ |
-| Fast serialize | ✗ baseline | 2× | **7–10×** |
-| Fast deserialize | ✗ baseline | 1.2–2.5× | **2–2.5×** |
+| Fast serialize | ✗ baseline | Often better on repeated structured data | Often strongest |
+| Fast deserialize | ✗ baseline | Usually better when schema reuse matters | Often strongest |
 | Zero-copy strings | ❌ | ❌ | ✅ |
-| SIMD acceleration | ❌ | ❌ | ✅ |
 | LLM-friendly | ⚠️ | ✅ | ❌ |
 | Universal tooling | ✅ | growing | growing |
 

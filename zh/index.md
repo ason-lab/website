@@ -4,7 +4,7 @@ layout: home
 hero:
   name: "ASON"
   text: "数组模式对象符号"
-  tagline: "比 JSON 少 65% Token。二进制序列化快 7–10 倍。人类可读。LLM 原生。"
+  tagline: "比 JSON 更省 Token。Schema 只写一次。人类可读，也适合 LLM。"
   image:
     src: /logo.svg
     alt: ASON
@@ -21,48 +21,47 @@ hero:
 
 features:
   - icon: 🚀
-    title: Token 节省 65%
-    details: Schema 只声明一次，数据行只保留纯值，不再重复 Key。大幅降低 LLM 上下文消耗和 API 费用。
+    title: Token 更省
+    details: Schema 只声明一次，数据行只保留值，不再重复 Key。非常适合 LLM 上下文和降低 API 成本。
     link: /zh/guide/why-ason
     linkText: 查看对比
 
   - icon: ⚡
-    title: 二进制快 7–10 倍
-    details: ASON-BIN 采用零拷贝反序列化与 SIMD 加速，序列化比 JSON 快 7.7 倍，体积缩小 39%。
+    title: 解析模型更有优势
+    details: ASON 避免重复字段匹配，解析器可以按 schema 顺序工作。具体性能收益取决于语言、运行时、载荷形态和实现成熟度。
     link: /zh/reference/performance
-    linkText: 查看基准测试
+    linkText: 性能说明
 
   - icon: 🧠
-    title: LLM 原生设计
-    details: 行导向语法 + Schema 分离，让大模型更容易生成正确的结构化输出，大幅减少幻觉和格式错误。
+    title: 适合 LLM
+    details: 行导向语法加 schema 分离，让模型更容易生成稳定的结构化输出，而不是一遍遍重复 JSON key。
     link: /zh/guide/llm-integration
-    linkText: LLM 集成方案
+    linkText: LLM 集成
 
   - icon: 📖
     title: 人类可读
-    details: 简洁的类 Markdown 语法，大多数值无需引号，行对齐清晰易扫描，信噪比极高。
+    details: 语法紧凑，大多数字符串无需引号。列表读起来更像表格，而不是层层嵌套的大括号。
     link: /zh/reference/syntax
     linkText: 语法参考
 
   - icon: 🌐
-    title: 多语言支持
-    details: 官方支持 Rust、Go、Python、C、C++、Java、Zig，跨语言 API 设计保持一致。
+    title: 多语言实现
+    details: 官方实现覆盖 Rust、Go、Python、C、C++、Java、Zig，并共享跨语言兼容性测试。
     link: /zh/languages/rust
     linkText: 语言指南
 
   - icon: 🔧
-    title: 完整工具链
-    details: VS Code 插件（语法高亮 + 实时预览）、LSP 服务器、跨语言兼容性测试套件。
-    link: /zh/guide/getting-started
-    linkText: 配置工具
+    title: 规范与工具
+    details: 规范、语法高亮、编辑器工具和兼容性矩阵一起保证各语言实现保持一致。
+    link: /zh/spec
+    linkText: 查看规范
 ---
 
 <div class="vp-doc" style="max-width:900px;margin:0 auto;padding:2rem 1.5rem">
 
-## ASON vs JSON — 一眼看懂
+## ASON vs JSON
 
 ```json
-// JSON — 约 100 Token
 {
   "users": [
     { "id": 1, "name": "Alice", "active": true },
@@ -73,34 +72,44 @@ features:
 ```
 
 ```ason
-// ASON — 约 35 Token  (节省 65%)
 [{id:int, name:str, active:bool}]:
   (1, Alice, true),
   (2, Bob,   false),
   (3, Carol, true)
 ```
 
-Schema **只写一次**，`:` 之后的每行都是纯数据，逗号分隔的元组 `(...)`，没有重复 Key，没有多余引号，没有噪音。
+Schema 只写一次，`:` 后面每一行都是纯数据。ASON 的大部分 token 与解析优势，都来自这个结构设计。
 
 ## 快速安装
 
 ::: code-group
 
 ```toml [Rust]
-# Cargo.toml
 [dependencies]
 ason = "0.1"
 serde = { version = "1", features = ["derive"] }
 ```
 
 ```bash [Go]
-go get github.com/ason-lab/ason/go
+go get github.com/ason-lab/ason-go
 ```
 
 ```bash [Python]
-# 将 ason.py 复制到你的项目（零依赖，仅标准库）
+cd ason-py
+python3 -m pip install -e .
 ```
 
 :::
+
+## 性能说明
+
+ASON 相比 JSON 的结构优势是稳定的，但性能倍数不是所有语言都一样。
+
+- 原生实现通常收益最大。
+- 托管运行时也可能表现很强。
+- 动态语言在重复结构数据上往往仍有明显收益，但不一定每次都领先。
+- 对很小的单对象文本载荷，收益可能不明显。
+
+先看 [性能概览](/zh/reference/performance)，再看 [benchmark notes](/zh/reference/benchmark-notes) 里的实现级说明。
 
 </div>

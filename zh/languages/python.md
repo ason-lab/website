@@ -1,95 +1,73 @@
 # Python 指南
 
-Python ASON 实现是单文件库（`ason.py`），零外部依赖，仅需 Python 标准库。
+Python 实现提供一个编译扩展模块，公开一组较小而稳定的文本与二进制 API。
+
+## 要求
+
+- 推荐 Python 3.13+
+- 构建和运行必须使用同一个 Python 版本
 
 ## 安装
 
-将 `ason.py` 复制到你的项目：
+```bash
+cd ason-py
+python3 -m pip install -e .
+```
+
+或直接在项目内构建扩展：
 
 ```bash
-cp /path/to/ason/python/ason.py ./ason.py
+cd ason-py
+python3 setup.py build_ext --inplace
 ```
 
-或从仓库安装：
-
-```bash
-pip install git+https://github.com/ason-lab/ason.git#subdirectory=python
-```
-
-## 编码
+## 文本 API
 
 ```python
-from ason import encode, encode_rows
-from dataclasses import dataclass
+import ason
 
-@dataclass
-class User:
-    id: int
-    name: str
-    active: bool
-
-# 单个结构体
-user = User(1, "Alice", True)
-text = encode(user)
-# → "{id,name,active}:(1,Alice,true)"
-
-# 列表
-users = [User(1, "Alice", True), User(2, "Bob", False)]
-text = encode_rows(users)
-# → "{id,name,active}:\n  (1,Alice,true),\n  (2,Bob,false)"
-```
-
-## 解码
-
-```python
-from ason import decode, decode_rows
-
-# 单个结构体
-user = decode(text, User)
-
-# 列表
-users = decode_rows(text, User)
-```
-
-## 类型支持
-
-| Python 类型 | ASON 类型 |
-|-------------|-----------|
-| `int` | `int` |
-| `float` | `float` |
-| `bool` | `bool` |
-| `str` | `str` |
-| `None` | 空槽 |
-| `list` | `[type]` |
-| `dataclass` | 嵌套 schema |
-| `Optional[T]` | 可空槽 |
-
-## 使用字典
-
-如果没有 dataclass，使用 `encode_dict_rows`：
-
-```python
-from ason import encode_dict_rows, decode_dict_rows
-
-rows = [
+users = [
     {"id": 1, "name": "Alice", "active": True},
-    {"id": 2, "name": "Bob",   "active": False},
+    {"id": 2, "name": "Bob", "active": False},
 ]
-text = encode_dict_rows(rows)
-back = decode_dict_rows(text)
+
+text = ason.encode(users)
+typed = ason.encodeTyped(users)
+pretty = ason.encodePrettyTyped(users)
+
+restored = ason.decode(typed)
+assert restored == users
 ```
+
+`encode()` 会自动推断 schema 并输出 untyped 文本。`encodeTyped()` 会输出 typed schema，更适合保真 round-trip。
+
+对 untyped 文本使用 `decode()` 时，由于 schema 不带类型信息，返回值里的字段会以字符串形式出现。
+
+## 二进制 API
+
+```python
+blob = ason.encodeBinary(users)
+restored = ason.decodeBinary(blob, "[{id:int, name:str, active:bool}]")
+```
+
+二进制编码会在内部推断 schema，但二进制解码当前仍需要显式传入 schema。
 
 ## 运行测试
 
 ```bash
-cd python && python -m pytest test_ason.py -v
+cd ason-py
+python3 -m pytest tests -v
 ```
 
 ## 运行示例
 
 ```bash
-cd python/examples
-python basic.py
-python bench.py
-python complex.py
+cd ason-py
+python3 examples/basic.py
+python3 examples/bench.py
+python3 examples/complex.py
 ```
+
+## 性能说明
+
+Python 的优势更多来自重复结构数据、文本更紧凑和 schema 复用，而不是解释器层面的极限吞吐。实现级说明见 [benchmark notes](/zh/reference/benchmark-notes)。

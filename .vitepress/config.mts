@@ -78,6 +78,7 @@ const enSidebar = {
         { text: 'Syntax', link: '/reference/syntax' },
         { text: 'Data Types', link: '/reference/data-types' },
         { text: 'Performance', link: '/reference/performance' },
+        { text: 'Benchmark Notes', link: '/reference/benchmark-notes' },
       ],
     },
   ],
@@ -123,6 +124,7 @@ const zhSidebar = {
         { text: '语法参考', link: '/zh/reference/syntax' },
         { text: '数据类型', link: '/zh/reference/data-types' },
         { text: '性能基准', link: '/zh/reference/performance' },
+        { text: '基准说明', link: '/zh/reference/benchmark-notes' },
       ],
     },
   ],
@@ -181,7 +183,7 @@ export default defineConfig({
         nav: enNav,
         sidebar: enSidebar,
         editLink: {
-          pattern: 'https://github.com/ason-lab/ason/edit/main/tools/website/:path',
+          pattern: 'https://github.com/ason-lab/ason/edit/main/website/:path',
           text: 'Edit this page on GitHub',
         },
         footer: {
@@ -200,7 +202,7 @@ export default defineConfig({
         nav: zhNav,
         sidebar: zhSidebar,
         editLink: {
-          pattern: 'https://github.com/ason-lab/ason/edit/main/tools/website/:path',
+          pattern: 'https://github.com/ason-lab/ason/edit/main/website/:path',
           text: '在 GitHub 上编辑此页',
         },
         footer: {

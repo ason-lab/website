@@ -1,6 +1,6 @@
 # Zig Guide
 
-The Zig ASON library leverages Zig's comptime features for zero-overhead serialization with full type safety.
+The Zig implementation uses comptime metadata to generate schema-aware text and binary codecs.
 
 ## Installation
 
@@ -40,41 +40,40 @@ pub fn main() !void {
 
     const users = [_]User{
         .{ .id = 1, .name = "Alice", .active = true },
-        .{ .id = 2, .name = "Bob",   .active = false },
+        .{ .id = 2, .name = "Bob", .active = false },
     };
 
-    // Serialize
-    const text = try ason.encodeSlice(allocator, &users);
+    const text = try ason.encodeVec(User, &users, allocator);
     defer allocator.free(text);
-    std.debug.print("{s}\n", .{text});
 
-    // Deserialize
-    const restored = try ason.decodeSlice(allocator, User, text);
+    const typed = try ason.encodeVecTyped(User, &users, allocator);
+    defer allocator.free(typed);
+
+    const restored = try ason.decodeVec(User, typed, allocator);
     defer allocator.free(restored);
 
-    // Binary
-    const bytes = try ason.encodeBinSlice(allocator, &users);
+    const bytes = try ason.encodeBinaryVec(User, &users, allocator);
     defer allocator.free(bytes);
-    const restored2 = try ason.decodeBinSlice(allocator, User, bytes);
+
+    const restored2 = try ason.decodeBinaryVec(User, bytes, allocator);
     defer allocator.free(restored2);
 }
 ```
 
-## Comptime Schema Generation
-
-Zig's `comptime` allows the schema to be generated at compile time with zero runtime overhead:
+## Comptime-Friendly API
 
 ```zig
-// Schema is computed at comptime from the struct fields
-const schema = ason.Schema(User);
-// schema.field_names → .{"id", "name", "active"}
-// schema.field_types → .{"int", "str", "bool"}
+const typed = try ason.encodeTyped(User, .{
+    .id = 1,
+    .name = "Alice",
+    .active = true,
+}, allocator);
 ```
 
 ## Building Examples
 
 ```bash
-cd zig
+cd ason-zig
 zig build run-basic
 zig build run-bench
 zig build run-complex
@@ -83,5 +82,5 @@ zig build run-complex
 ## Running Tests
 
 ```bash
-cd zig && zig build test
+cd ason-zig && zig build test
 ```

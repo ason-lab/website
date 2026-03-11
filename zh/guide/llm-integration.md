@@ -82,18 +82,11 @@ Schema: {field1:type, field2:type, ...}
 
 ```python
 import openai
-from ason import decode_rows
-from dataclasses import dataclass
+import ason
 
-@dataclass
-class Review:
-    id: int
-    sentiment: str
-    score: float
+SCHEMA = "[{id:int, sentiment:str, score:float}]"
 
-SCHEMA = "{id:int, sentiment:str, score:float}"
-
-def analyze(reviews: list[str]) -> list[Review]:
+def analyze(reviews: list[str]) -> list[dict]:
     numbered = "\n".join(f"{i+1}. {r}" for i, r in enumerate(reviews))
     prompt = f"""分析每条评论的情感倾向。
 只用 ASON 格式返回，Schema：{SCHEMA}
@@ -103,7 +96,7 @@ def analyze(reviews: list[str]) -> list[Review]:
 
     resp = openai.chat.completions.create(
         model="gpt-4o",
-        messages=[{"role": "user", "content": prompt}]
+        messages=[{"role": "user", "content": prompt}],
     )
-    return decode_rows(resp.choices[0].message.content, Review)
+    return ason.decode(resp.choices[0].message.content)
 ```

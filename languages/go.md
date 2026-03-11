@@ -1,21 +1,21 @@
 # Go Guide
 
-The Go ASON library provides idiomatic, reflection-based encoding and decoding for ASON Text and ASON-BIN formats.
+The Go implementation provides reflection-based encoding and decoding for ASON text and binary formats.
 
-## Installation
+## Install
 
 ```bash
-go get github.com/ason-lab/ason/go
+go get github.com/ason-lab/ason-go
 ```
 
-## Text Format
+## Text API
 
 ```go
 package main
 
 import (
     "fmt"
-    "github.com/ason-lab/ason/go"
+    ason "github.com/ason-lab/ason-go"
 )
 
 type User struct {
@@ -25,47 +25,35 @@ type User struct {
 }
 
 func main() {
-    // Serialize single struct
     user := User{ID: 1, Name: "Alice", Active: true}
-    s, err := ason.Marshal(user)
 
-    // Serialize slice
-    users := []User{{1, "Alice", true}, {2, "Bob", false}}
-    s, err = ason.MarshalSlice(users)
-    fmt.Println(s)
-    // {id:str,name:str,active:bool}:
-    //   (1,Alice,true),
-    //   (2,Bob,false)
+    text, _ := ason.Encode(user)
+    typed, _ := ason.EncodeTyped(&user)
+    pretty, _ := ason.EncodePrettyTyped([]User{user})
 
-    // Deserialize slice
-    var out []User
-    err = ason.UnmarshalSlice(s, &out)
+    fmt.Println(text)
+    fmt.Println(typed)
+    fmt.Println(pretty)
 
-    // Deserialize single
-    var u User
-    err = ason.Unmarshal(s, &u)
-    _ = err
+    var out User
+    _ = ason.Decode(typed, &out)
 }
 ```
 
-## Binary Format
+Use `EncodeTyped` when you need type-preserving round-trips. Use `Encode` when you want shorter untyped text.
+
+## Binary API
 
 ```go
-// Serialize
-data, err := ason.MarshalBin(user)
-data, err  = ason.MarshalBinSlice(users)
+data, _ := ason.EncodeBinary(user)
 
-// Deserialize
-var u User
-err = ason.UnmarshalBin(data, &u)
-
-var us []User
-err = ason.UnmarshalBinSlice(data, &us)
+var out User
+_ = ason.DecodeBinary(data, &out)
 ```
 
 ## Field Tags
 
-Use `ason:"fieldname"` struct tags to control field naming:
+Use `ason:"fieldname"` tags to control schema field names.
 
 ```go
 type Product struct {
@@ -75,18 +63,22 @@ type Product struct {
 }
 ```
 
-Fields without an `ason` tag use the lowercase struct field name.
-
-## Running Examples
+## Run Examples
 
 ```bash
-cd go/examples/basic    && go run main.go
-cd go/examples/bench    && go run main.go
-cd go/examples/complex  && go run main.go
+cd ason-go
+go run ./examples/basic
+go run ./examples/bench
+go run ./examples/complex
 ```
 
-## Running Tests
+## Run Tests
 
 ```bash
-cd go && go test ./...
+cd ason-go
+go test ./...
 ```
+
+## Performance Notes
+
+Go usually benefits most on repeated structs and arrays. For implementation-specific notes, see [benchmark notes](/reference/benchmark-notes).

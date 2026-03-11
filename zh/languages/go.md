@@ -1,21 +1,21 @@
 # Go 指南
 
-Go ASON 库通过反射提供惯用的编解码 API，支持 ASON Text 和 ASON-BIN 格式。
+Go 实现通过反射提供 ASON 文本与二进制格式的编解码能力。
 
 ## 安装
 
 ```bash
-go get github.com/ason-lab/ason/go
+go get github.com/ason-lab/ason-go
 ```
 
-## 文本格式
+## 文本 API
 
 ```go
 package main
 
 import (
     "fmt"
-    "github.com/ason-lab/ason/go"
+    ason "github.com/ason-lab/ason-go"
 )
 
 type User struct {
@@ -25,47 +25,35 @@ type User struct {
 }
 
 func main() {
-    // 序列化单个结构体
     user := User{ID: 1, Name: "Alice", Active: true}
-    s, err := ason.Marshal(user)
 
-    // 序列化切片
-    users := []User{{1, "Alice", true}, {2, "Bob", false}}
-    s, err = ason.MarshalSlice(users)
-    fmt.Println(s)
-    // {id:str,name:str,active:bool}:
-    //   (1,Alice,true),
-    //   (2,Bob,false)
+    text, _ := ason.Encode(user)
+    typed, _ := ason.EncodeTyped(&user)
+    pretty, _ := ason.EncodePrettyTyped([]User{user})
 
-    // 反序列化切片
-    var out []User
-    err = ason.UnmarshalSlice(s, &out)
+    fmt.Println(text)
+    fmt.Println(typed)
+    fmt.Println(pretty)
 
-    // 反序列化单个
-    var u User
-    err = ason.Unmarshal(s, &u)
-    _ = err
+    var out User
+    _ = ason.Decode(typed, &out)
 }
 ```
 
-## 二进制格式
+需要保真 round-trip 时使用 `EncodeTyped`。如果只是追求更短的文本输出，可以使用 `Encode`。
+
+## 二进制 API
 
 ```go
-// 序列化
-data, err := ason.MarshalBin(user)
-data, err  = ason.MarshalBinSlice(users)
+data, _ := ason.EncodeBinary(user)
 
-// 反序列化
-var u User
-err = ason.UnmarshalBin(data, &u)
-
-var us []User
-err = ason.UnmarshalBinSlice(data, &us)
+var out User
+_ = ason.DecodeBinary(data, &out)
 ```
 
 ## 字段标签
 
-使用 `ason:"fieldname"` 结构体标签控制字段命名：
+使用 `ason:"fieldname"` 控制 schema 中的字段名。
 
 ```go
 type Product struct {
@@ -75,18 +63,22 @@ type Product struct {
 }
 ```
 
-没有 `ason` 标签的字段使用结构体字段名的小写形式。
-
 ## 运行示例
 
 ```bash
-cd go/examples/basic    && go run main.go
-cd go/examples/bench    && go run main.go
-cd go/examples/complex  && go run main.go
+cd ason-go
+go run ./examples/basic
+go run ./examples/bench
+go run ./examples/complex
 ```
 
 ## 运行测试
 
 ```bash
-cd go && go test ./...
+cd ason-go
+go test ./...
 ```
+
+## 性能说明
+
+Go 在重复结构体和数组场景下通常收益较明显。实现级 benchmark 说明见 [benchmark notes](/zh/reference/benchmark-notes)。

@@ -1,23 +1,18 @@
 # Getting Started
 
-Pick your language below for a five-minute quickstart.
+Pick your language below for a quick first round-trip.
 
 ## Rust
 
-### Installation
-
 ```toml
-# Cargo.toml
 [dependencies]
 ason = "0.1"
 serde = { version = "1", features = ["derive"] }
 ```
 
-### Quickstart
-
 ```rust
-use ason::{to_string_vec, from_str_vec, StructSchema, Result};
-use serde::{Serialize, Deserialize};
+use ason::{decode, encode_typed, Result};
+use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize, PartialEq)]
 struct User {
@@ -26,21 +21,14 @@ struct User {
     active: bool,
 }
 
-impl StructSchema for User {
-    fn field_names() -> &'static [&'static str] { &["id", "name", "active"] }
-    fn field_types() -> &'static [&'static str] { &["int", "str", "bool"] }
-}
-
 fn main() -> Result<()> {
     let users = vec![
         User { id: 1, name: "Alice".into(), active: true },
-        User { id: 2, name: "Bob".into(),   active: false },
+        User { id: 2, name: "Bob".into(), active: false },
     ];
 
-    let s = to_string_vec(&users)?;
-    // "{id:int,name:str,active:bool}:\n  (1,Alice,true),\n  (2,Bob,false)"
-
-    let restored: Vec<User> = from_str_vec(&s)?;
+    let text = encode_typed(&users)?;
+    let restored: Vec<User> = decode(&text)?;
     assert_eq!(users, restored);
     Ok(())
 }
@@ -48,24 +36,18 @@ fn main() -> Result<()> {
 
 See the full [Rust guide](/languages/rust).
 
----
-
 ## Go
 
-### Installation
-
 ```bash
-go get github.com/ason-lab/ason/go
+go get github.com/ason-lab/ason-go
 ```
-
-### Quickstart
 
 ```go
 package main
 
 import (
     "fmt"
-    "github.com/ason-lab/ason/go"
+    ason "github.com/ason-lab/ason-go"
 )
 
 type User struct {
@@ -76,76 +58,53 @@ type User struct {
 
 func main() {
     users := []User{
-        {1, "Alice", true},
-        {2, "Bob", false},
+        {ID: 1, Name: "Alice", Active: true},
+        {ID: 2, Name: "Bob", Active: false},
     }
-    s, _ := ason.MarshalSlice(users)
-    fmt.Println(s)
 
+    text, _ := ason.EncodeTyped(users)
     var out []User
-    ason.UnmarshalSlice(s, &out)
+    _ = ason.Decode(text, &out)
+    fmt.Println(out)
 }
 ```
 
 See the full [Go guide](/languages/go).
 
----
-
 ## Python
 
-### Installation
-
 ```bash
-# copy ason.py into your project (zero external dependencies)
-cp /path/to/ason/python/ason.py .
+cd ason-py
+python3 -m pip install -e .
 ```
 
-### Quickstart
-
 ```python
-from ason import encode_rows, decode_rows
-from dataclasses import dataclass
+import ason
 
-@dataclass
-class User:
-    id: int
-    name: str
-    active: bool
+users = [
+    {"id": 1, "name": "Alice", "active": True},
+    {"id": 2, "name": "Bob", "active": False},
+]
 
-users = [User(1, "Alice", True), User(2, "Bob", False)]
+text = ason.encodeTyped(users)
+restored = ason.decode(text)
 
-text = encode_rows(users)
-print(text)
-# {id,name,active}:
-#   (1,Alice,true),
-#   (2,Bob,false)
-
-restored = decode_rows(text, User)
+assert restored == users
 ```
 
 See the full [Python guide](/languages/python).
-
----
 
 ## Other Languages
 
 | Language | Guide |
 |----------|-------|
-| C        | [C guide](/languages/c) |
-| C++      | [C++ guide](/languages/cpp) |
-| Java     | [Java guide](/languages/java) |
-| Zig      | [Zig guide](/languages/zig) |
+| C | [C guide](/languages/c) |
+| C++ | [C++ guide](/languages/cpp) |
+| Java | [Java guide](/languages/java) |
+| Zig | [Zig guide](/languages/zig) |
 
----
+## Tooling
 
-## VS Code Extension
-
-Install the **ASON** extension from the marketplace for:
-- Syntax highlighting for `.ason` files
-- Live preview panel
-- LSP-powered diagnostics
-
-```bash
-# Or use the built-in LSP server
-cd tools/ason-lsp && go build -o ason-lsp . && sudo mv ason-lsp /usr/local/bin/
-```
+- Read the [spec](/spec) for the canonical format definition.
+- Use the VS Code extension for syntax highlighting and preview.
+- Use the compatibility and benchmark pages when comparing implementations.

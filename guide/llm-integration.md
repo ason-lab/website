@@ -83,20 +83,13 @@ For structured extraction with validation, use a library wrapper that:
 
 ```python
 import openai
-from ason import decode_rows
-from dataclasses import dataclass
+import ason
 
-@dataclass
-class Review:
-    id: int
-    sentiment: str
-    score: float
+SCHEMA = "[{id:int, sentiment:str, score:float}]"
 
-SCHEMA = "{id:int, sentiment:str, score:float}"
-
-def analyze(reviews: list[str]) -> list[Review]:
+def analyze(reviews: list[str]) -> list[dict]:
     numbered = "\n".join(f"{i+1}. {r}" for i, r in enumerate(reviews))
-    prompt = f"""Analyze sentiment for each review. 
+    prompt = f"""Analyze sentiment for each review.
 Respond ONLY with ASON using this schema: {SCHEMA}
 
 Reviews:
@@ -104,7 +97,7 @@ Reviews:
 
     resp = openai.chat.completions.create(
         model="gpt-4o",
-        messages=[{"role": "user", "content": prompt}]
+        messages=[{"role": "user", "content": prompt}],
     )
-    return decode_rows(resp.choices[0].message.content, Review)
+    return ason.decode(resp.choices[0].message.content)
 ```

@@ -63,13 +63,11 @@ public class Main {
 ## Binary Format
 
 ```java
-import io.ason.AsonBinary;
+byte[] bytes = Ason.encodeBinary(user);
+User restored = Ason.decodeBinary(bytes, User.class);
 
-byte[] bytes   = AsonBinary.encode(user);
-User   restored = AsonBinary.decode(bytes, User.class);
-
-byte[]      binList  = AsonBinary.encodeList(users, User.class);
-List<User>  restored2 = AsonBinary.decodeList(binList, User.class);
+byte[] binList = Ason.encodeBinary(users);
+List<User> restored2 = Ason.decodeBinaryList(binList, User.class);
 ```
 
 ## Field Annotations
@@ -83,7 +81,7 @@ List<User>  restored2 = AsonBinary.decodeList(binList, User.class);
 ## Building
 
 ```bash
-cd java
+cd ason-java
 ./gradlew build
 ./gradlew test
 ./gradlew run

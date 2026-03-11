@@ -73,7 +73,7 @@ int main(void) {
 ## Building Examples
 
 ```bash
-cd c
+cd ason-c
 cmake -B build -DCMAKE_BUILD_TYPE=Release
 cmake --build build
 ./build/examples/basic
@@ -83,5 +83,5 @@ cmake --build build
 ## Running Tests
 
 ```bash
-cd c/build && ctest --output-on-failure
+cd ason-c/build && ctest --output-on-failure
 ```

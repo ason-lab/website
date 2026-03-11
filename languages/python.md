@@ -1,95 +1,73 @@
 # Python Guide
 
-The Python ASON implementation is a single-file library (`ason.py`) with zero external dependencies — works with the Python standard library only.
+The Python implementation exposes a compiled extension module with a small text and binary API surface.
 
-## Installation
+## Requirements
 
-Copy `ason.py` into your project:
+- Python 3.13+ recommended
+- Build and run with the same Python version
 
-```bash
-cp /path/to/ason/python/ason.py ./ason.py
-```
-
-Or install from the repo:
+## Install
 
 ```bash
-pip install git+https://github.com/ason-lab/ason.git#subdirectory=python
+cd ason-py
+python3 -m pip install -e .
 ```
 
-## Encoding
+Or build the extension in place:
 
-```python
-from ason import encode, encode_rows
-from dataclasses import dataclass
-
-@dataclass
-class User:
-    id: int
-    name: str
-    active: bool
-
-# Single struct
-user = User(1, "Alice", True)
-text = encode(user)
-# → "{id,name,active}:(1,Alice,true)"
-
-# List
-users = [User(1, "Alice", True), User(2, "Bob", False)]
-text = encode_rows(users)
-# → "{id,name,active}:\n  (1,Alice,true),\n  (2,Bob,false)"
+```bash
+cd ason-py
+python3 setup.py build_ext --inplace
 ```
 
-## Decoding
+## Text API
 
 ```python
-from ason import decode, decode_rows
+import ason
 
-# Single struct
-user = decode(text, User)
-
-# List
-users = decode_rows(text, User)
-```
-
-## Type Support
-
-| Python type | ASON type |
-|-------------|-----------|
-| `int` | `int` |
-| `float` | `float` |
-| `bool` | `bool` |
-| `str` | `str` |
-| `None` | empty slot |
-| `list` | `[type]` |
-| `dataclass` | nested schema |
-| `Optional[T]` | nullable slot |
-
-## Working with Dicts
-
-If you don't have a dataclass, use `encode_dict_rows`:
-
-```python
-from ason import encode_dict_rows, decode_dict_rows
-
-rows = [
+users = [
     {"id": 1, "name": "Alice", "active": True},
-    {"id": 2, "name": "Bob",   "active": False},
+    {"id": 2, "name": "Bob", "active": False},
 ]
-text = encode_dict_rows(rows)
-back = decode_dict_rows(text)
+
+text = ason.encode(users)
+typed = ason.encodeTyped(users)
+pretty = ason.encodePrettyTyped(users)
+
+restored = ason.decode(typed)
+assert restored == users
 ```
 
-## Running Tests
+`encode()` infers schema and emits untyped text. `encodeTyped()` emits typed schema and should be preferred for type-preserving round-trips.
+
+When decoding untyped text with `decode()`, values are returned as strings because the schema does not carry types.
+
+## Binary API
+
+```python
+blob = ason.encodeBinary(users)
+restored = ason.decodeBinary(blob, "[{id:int, name:str, active:bool}]")
+```
+
+Binary encoding infers schema internally. Binary decoding still needs an explicit schema.
+
+## Run Tests
 
 ```bash
-cd python && python -m pytest test_ason.py -v
+cd ason-py
+python3 -m pytest tests -v
 ```
 
-## Running Examples
+## Run Examples
 
 ```bash
-cd python/examples
-python basic.py
-python bench.py
-python complex.py
+cd ason-py
+python3 examples/basic.py
+python3 examples/bench.py
+python3 examples/complex.py
 ```
+
+## Performance Notes
+
+Python benefits most on repetitive structured payloads. Expect bigger wins from smaller text payloads and inferred schema reuse than from raw interpreter speed alone. See [benchmark notes](/reference/benchmark-notes).

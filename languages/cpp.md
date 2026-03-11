@@ -67,7 +67,7 @@ int main() {
 ## Building Examples
 
 ```bash
-cd cpp
+cd ason-cpp
 cmake -B build -DCMAKE_BUILD_TYPE=Release
 cmake --build build
 ./build/examples/basic
@@ -77,5 +77,5 @@ cmake --build build
 ## Running Tests
 
 ```bash
-cd cpp/build && ctest --output-on-failure
+cd ason-cpp/build && ctest --output-on-failure
 ```
