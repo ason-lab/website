@@ -50,7 +50,7 @@ public class Main {
         // 序列化
         String text = Ason.encodeList(users, User.class);
         System.out.println(text);
-        // {id:int,name:str,active:bool}:
+        // {id@int,name@str,active@bool}:
         //   (1,Alice,true),
         //   (2,Bob,false)
 

@@ -18,7 +18,7 @@ schema ":" data
 
 ```ason
 {id, name, active}
-{id:int, name:str, active:bool}
+{id@int, name@str, active@bool}
 ```
 
 Type annotations are optional in text mode.
@@ -33,7 +33,7 @@ Type annotations are optional in text mode.
 | `bool` | Boolean |
 | `{...}` | Nested struct |
 | `[type]` | Array |
-| `<K:V>` | Map |
+| `[{...}]` | Array of structs |
 
 ## Tuples
 
@@ -46,7 +46,7 @@ Values follow schema order.
 Lists use one schema and many tuples:
 
 ```ason
-[{id:int, name:str}]:
+[{id@int, name@str}]:
   (1, Alice),
   (2, Bob)
 ```
@@ -80,7 +80,7 @@ false
 An empty slot means null / absent:
 
 ```ason
-[{id:int, label:str}]:
+[{id@int, label@str}]:
   (1, hello),
   (2,      )
 ```
@@ -105,7 +105,7 @@ Use quotes when you need to preserve whitespace or include reserved characters:
 ## Nested Structs
 
 ```ason
-[{name:str, dept:{title:str}}]:
+[{name@str, dept@{title@str}}]:
   (Alice, (Engineering)),
   (Bob,   (Platform))
 ```
@@ -113,16 +113,16 @@ Use quotes when you need to preserve whitespace or include reserved characters:
 ## Arrays
 
 ```ason
-[{name:str, scores:[int]}]:
+[{name@str, scores@[int]}]:
   (Alice, [90, 85, 92]),
   (Bob,   [76, 88])
 ```
 
-## Maps
+## Keyed Entry Lists
 
 ```ason
-[{name:str, attrs:<str:int>}]:
-  (Alice, <age:30, score:95>)
+[{name@str, attrs@[{key@str, value@int}]}]:
+  (Alice, [(age, 30), (score, 95)])
 ```
 
 ## Comments
@@ -131,7 +131,7 @@ ASON supports block comments:
 
 ```ason
 /* schema for a user list */
-[{id:int, name:str}]:
+[{id@int, name@str}]:
   (1, Alice),
   (2, Bob)
 ```
@@ -143,7 +143,7 @@ Line comments are not part of the format.
 A single value can be written on one line:
 
 ```ason
-{id:int, name:str, active:bool}:(1, Alice, true)
+{id@int, name@str, active@bool}:(1, Alice, true)
 ```
 
 ## Whitespace

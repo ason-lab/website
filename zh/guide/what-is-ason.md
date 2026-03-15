@@ -5,7 +5,7 @@ ASON 的全称是 **Array-Schema Object Notation**。
 它围绕一个核心想法构建：schema 只声明一次，后续每一行只传值。
 
 ```ason
-[{id:int, name:str, active:bool}]:
+[{id@int, name@str, active@bool}]:
   (1, Alice, true),
   (2, Bob,   false),
   (3, Carol, true)

@@ -5,7 +5,7 @@ ASON stands for **Array-Schema Object Notation**.
 It is a serialization format built around one idea: declare schema once, then send rows as values only.
 
 ```ason
-[{id:int, name:str, active:bool}]:
+[{id@int, name@str, active@bool}]:
   (1, Alice, true),
   (2, Bob,   false),
   (3, Carol, true)

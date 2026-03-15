@@ -13,7 +13,7 @@ Schema 以 `{` 和 `}` 包裹，内含逗号分隔的字段定义：
 字段可选地包含类型注解：
 
 ```ason
-{name:str, age:int, active:bool}
+{name@str, age@int, active@bool}
 ```
 
 类型注解是为人类和工具提供的可选提示 —— 当目标类型已由宿主语言类型系统确定时，它们不影响解析行为。
@@ -23,7 +23,7 @@ Schema 以 `{` 和 `}` 包裹，内含逗号分隔的字段定义：
 对于切片（结构体列表），需要将 Schema 用 `[` `]` 包裹：
 
 ```ason
-[{name:str, age:int}]:
+[{name@str, age@int}]:
   (Alice, 30),
   (Bob,   25)
 ```
@@ -39,19 +39,19 @@ Schema 以 `{` 和 `}` 包裹，内含逗号分隔的字段定义：
 Schema 可以嵌套，表示嵌套对象：
 
 ```ason
-[{id:int, address:{city:str, zip:str}}]:
+[{id@int, address@{city@str, zip@str}}]:
   (1, (Berlin, 10115)),
   (2, (Paris,  75001))
 ```
 
-内层 Schema `{city:str, zip:str}` 对应内层元组 `(Berlin, 10115)`。
+内层 Schema `{city@str, zip@str}` 对应内层元组 `(Berlin, 10115)`。
 
 ## 数组字段
 
 包含列表的字段使用 `[type]` 记法：
 
 ```ason
-[{id:int, tags:[str]}]:
+[{id@int, tags@[str]}]:
   (1, [rust, go]),
   (2, [python, c++])
 ```
@@ -61,7 +61,7 @@ Schema 可以嵌套，表示嵌套对象：
 两个逗号之间的空槽（什么都没有）表示 `null` / `None`：
 
 ```ason
-[{id:int, name:str, score:float}]:
+[{id@int, name@str, score@float}]:
   (1, Alice, 9.5),
   (2, Bob,       )
 ```

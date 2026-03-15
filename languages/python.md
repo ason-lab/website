@@ -47,7 +47,7 @@ When decoding untyped text with `decode()`, values are returned as strings becau
 
 ```python
 blob = ason.encodeBinary(users)
-restored = ason.decodeBinary(blob, "[{id:int, name:str, active:bool}]")
+restored = ason.decodeBinary(blob, "[{id@int, name@str, active@bool}]")
 ```
 
 Binary encoding infers schema internally. Binary decoding still needs an explicit schema.

@@ -13,7 +13,7 @@ A schema is delimited by `{` and `}` and contains a comma-separated list of fiel
 Fields can optionally include type annotations:
 
 ```ason
-{name:str, age:int, active:bool}
+{name@str, age@int, active@bool}
 ```
 
 Type annotations are optional hints for humans and tooling — they do not change parsing behavior when the target type is already known from the host language's type system.
@@ -23,7 +23,7 @@ Type annotations are optional hints for humans and tooling — they do not chang
 For a slice (list of structs), wrap the schema in `[` `]`:
 
 ```ason
-[{name:str, age:int}]:
+[{name@str, age@int}]:
   (Alice, 30),
   (Bob,   25)
 ```
@@ -39,19 +39,19 @@ For a single struct (not a list), no wrapping needed:
 Schemas can be nested to represent nested objects:
 
 ```ason
-[{id:int, address:{city:str, zip:str}}]:
+[{id@int, address@{city@str, zip@str}}]:
   (1, (Berlin, 10115)),
   (2, (Paris,  75001))
 ```
 
-The inner schema `{city:str, zip:str}` is substituted by an inner tuple `(Berlin, 10115)`.
+The inner schema `{city@str, zip@str}` is substituted by an inner tuple `(Berlin, 10115)`.
 
 ## Array Fields
 
 Fields that contain lists use `[type]` notation:
 
 ```ason
-[{id:int, tags:[str]}]:
+[{id@int, tags@[str]}]:
   (1, [rust, go]),
   (2, [python, c++])
 ```
@@ -61,7 +61,7 @@ Fields that contain lists use `[type]` notation:
 An empty slot between commas represents `null` / `None`:
 
 ```ason
-[{id:int, name:str, score:float}]:
+[{id@int, name@str, score@float}]:
   (1, Alice, 9.5),
   (2, Bob,       )
 ```

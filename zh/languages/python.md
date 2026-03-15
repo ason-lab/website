@@ -47,7 +47,7 @@ assert restored == users
 
 ```python
 blob = ason.encodeBinary(users)
-restored = ason.decodeBinary(blob, "[{id:int, name:str, active:bool}]")
+restored = ason.decodeBinary(blob, "[{id@int, name@str, active@bool}]")
 ```
 
 二进制编码会在内部推断 schema，但二进制解码当前仍需要显式传入 schema。

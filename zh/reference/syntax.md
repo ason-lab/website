@@ -18,7 +18,7 @@ schema ":" data
 
 ```ason
 {id, name, active}
-{id:int, name:str, active:bool}
+{id@int, name@str, active@bool}
 ```
 
 文本模式下，类型注解是可选的。
@@ -33,7 +33,7 @@ schema ":" data
 | `bool` | 布尔值 |
 | `{...}` | 嵌套结构体 |
 | `[type]` | 数组 |
-| `<K:V>` | 映射 |
+| `[{...}]` | 对象数组 |
 
 ## 元组
 
@@ -46,7 +46,7 @@ schema ":" data
 列表写法是一个 schema 对应多行元组：
 
 ```ason
-[{id:int, name:str}]:
+[{id@int, name@str}]:
   (1, Alice),
   (2, Bob)
 ```
@@ -80,7 +80,7 @@ false
 空槽表示 null 或缺失值：
 
 ```ason
-[{id:int, label:str}]:
+[{id@int, label@str}]:
   (1, hello),
   (2,      )
 ```
@@ -105,7 +105,7 @@ hello world
 ## 嵌套结构
 
 ```ason
-[{name:str, dept:{title:str}}]:
+[{name@str, dept@{title@str}}]:
   (Alice, (Engineering)),
   (Bob,   (Platform))
 ```
@@ -113,16 +113,16 @@ hello world
 ## 数组
 
 ```ason
-[{name:str, scores:[int]}]:
+[{name@str, scores@[int]}]:
   (Alice, [90, 85, 92]),
   (Bob,   [76, 88])
 ```
 
-## 映射
+## 键值条目列表
 
 ```ason
-[{name:str, attrs:<str:int>}]:
-  (Alice, <age:30, score:95>)
+[{name@str, attrs@[{key@str, value@int}]}]:
+  (Alice, [(age, 30), (score, 95)])
 ```
 
 ## 注释
@@ -131,7 +131,7 @@ ASON 支持块注释：
 
 ```ason
 /* user list schema */
-[{id:int, name:str}]:
+[{id@int, name@str}]:
   (1, Alice),
   (2, Bob)
 ```
@@ -143,7 +143,7 @@ ASON 支持块注释：
 单个值可以写成单行形式：
 
 ```ason
-{id:int, name:str, active:bool}:(1, Alice, true)
+{id@int, name@str, active@bool}:(1, Alice, true)
 ```
 
 ## 空白规则

@@ -20,7 +20,7 @@ Even with function calling / tool use, JSON-based structured output has high fai
 ASON requires fewer special characters. Most string values are unquoted:
 
 ```ason
-[{name:str, role:str}]:
+[{name@str, role@str}]:
   (Alice, admin),
   (Bob,   viewer)
 ```
@@ -32,11 +32,9 @@ No quotes around `Alice`, `admin`, `viewer`. No commas inside value strings unle
 Include the schema once in the system prompt or as a header:
 
 ```
-Respond with ASON using this schema:
-[{id:int, name:str, sentiment:str, score:float}]
+Respond with ASON using this schema@[{id@int, name@str, sentiment@str, score@float}]
 
-Example:
-[{id:int, name:str, sentiment:str, score:float}]:
+Example@[{id@int, name@str, sentiment@str, score@float}]:
   (1, Product A, positive, 0.92),
   (2, Product B, neutral,  0.51)
 
@@ -68,7 +66,7 @@ ASON's row-oriented format means each tuple `(...)` is a self-contained unit. Cl
 ## Output format
 Use ASON with the schema below. Output ONLY the ASON block, no explanation.
 
-Schema: {field1:type, field2:type, ...}
+Schema@{field1@type, field2@type, ...}
 
 ## Data
 ...your input data...
@@ -85,15 +83,14 @@ For structured extraction with validation, use a library wrapper that:
 import openai
 import ason
 
-SCHEMA = "[{id:int, sentiment:str, score:float}]"
+SCHEMA = "[{id@int, sentiment@str, score@float}]"
 
 def analyze(reviews: list[str]) -> list[dict]:
     numbered = "\n".join(f"{i+1}. {r}" for i, r in enumerate(reviews))
     prompt = f"""Analyze sentiment for each review.
-Respond ONLY with ASON using this schema: {SCHEMA}
+Respond ONLY with ASON using this schema@{SCHEMA}
 
-Reviews:
-{numbered}"""
+Reviews@{numbered}"""
 
     resp = openai.chat.completions.create(
         model="gpt-4o",
