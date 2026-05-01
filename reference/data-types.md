@@ -12,7 +12,7 @@ Current ASUN schema names are intentionally small and fixed. The only scalar sch
 | ASUN type        | Example                | Notes                                     |
 | ---------------- | ---------------------- | ----------------------------------------- |
 | `int`            | `42`, `-100`, `0`      | Any `i64`-range integer                   |
-| `float`          | `3.14`, `-0.5`, `1e10` | Floating-point text form                  |
+| `float`          | `3.14`, `-0.5`, `1e10`, `1.5e-3` | Floating-point text form                  |
 | `bool`           | `true`, `false`        | Lowercase only                            |
 | `str` (unquoted) | `Alice Smith`          | Outer whitespace is trimmed               |
 | `str` (quoted)   | `" spaces "`           | Preserves whitespace and supports escapes |
@@ -53,13 +53,19 @@ Keyed collections use an array of entry structs:
 
 ### Option / Nullable
 
-An empty slot means `null` / `None`:
+An empty slot inside a tuple or array means `null` / `None`:
 
 ```asun
 [{id@int, score@float}]:
   (1, 9.5),
   (2,    )
 ```
+
+A trailing comma is ignored. Use a doubled comma for a final null, such as `(2,,)`.
+
+### Numeric Lexing Notes
+
+Integers are `-?[0-9]+`. Floats must either contain a decimal point with digits on both sides or a valid exponent. The tokens `.5`, `5.`, `+5`, `1e`, and `1e+` are strings.
 
 ## Cross-Language Type Mapping
 

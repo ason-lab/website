@@ -67,16 +67,16 @@ This means:
 
 ## Field Names
 
-Plain field names work for simple identifiers:
+Plain field names contain only ASCII letters, digits, and `_`:
 
 ```asun
-{id, name, active}
+{id, name, active, 65}
 ```
 
-Quoted field names are required when a field name contains spaces, starts with digits, or contains syntax characters:
+Quoted field names are required when a field name contains spaces, `+`, `-`, `.`, or syntax characters:
 
 ```asun
-{"id uuid"@int, "65"@bool, "{}[]@\""@str}
+{"id uuid"@int, "a+b"@str, "{}[]@\""@str}
 ```
 
 ## Data Rules
@@ -99,7 +99,10 @@ An empty slot represents null / missing:
 
 ```asun
 {id@int, score@float}:(1, )
+[1,,3]
 ```
+
+Trailing commas do not create nulls. Use a doubled comma for a final null: `(a,b,,)`.
 
 ## What ASUN Does Not Do
 
@@ -126,7 +129,7 @@ type     = "int" | "float" | "str" | "bool" | schema | "[" type "]"
 rows     = tuple ("," tuple)*
 tuple    = "(" values ")"
 values   = value ("," value)*
-value    = scalar | tuple | "[" values "]" | ""
+value    = scalar | tuple | "[" values "]" | empty
 ```
 
 See the full [Syntax Reference](/reference/syntax) for string, escaping, whitespace, and comment rules.

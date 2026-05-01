@@ -33,25 +33,25 @@
           "patterns": [
             { "include": "#comment" },
             { "include": "#schema" },
+            { "include": "#quoted-field-name" },
             { "include": "#type-hint" },
             { "include": "#field-name" },
-            { "include": "#operators" },
-            { "include": "#map-keyword" }
+            { "include": "#operators" }
           ]
         }
       ]
     },
+    "quoted-field-name": {
+      "name": "variable.other.field.asun",
+      "match": "\"(?:\\\\.|[^\"\\\\])*\"(?=\\s*(?:[@,}]|/\\*|$))"
+    },
     "field-name": {
       "name": "variable.other.field.asun",
-      "match": "[a-zA-Z_][a-zA-Z0-9_+\\-]*(?=\\s*[,:}])"
+      "match": "[a-zA-Z0-9_]+(?=\\s*(?:[@,}]|/\\*|$))"
     },
     "type-hint": {
       "name": "support.type.asun",
-      "match": "\\b(int|integer|float|double|str|string|bool|boolean)\\b"
-    },
-    "map-keyword": {
-      "name": "keyword.other.map.asun",
-      "match": "\\bmap\\b"
+      "match": "\\b(int|float|str|bool)\\b"
     },
     "data": {
       "patterns": [
@@ -99,6 +99,7 @@
             { "include": "#number" },
             { "include": "#boolean" },
             { "include": "#operators" },
+            { "include": "#quoted-field-name" },
             { "include": "#type-hint" },
             { "include": "#field-name" },
             { "include": "#plain-string" }
@@ -113,13 +114,13 @@
       "patterns": [
         {
           "name": "constant.character.escape.asun",
-          "match": "\\\\."
+          "match": "\\\\(?:[\\\\\",ntrbf(),\\[\\]{}:@]|u[0-9A-Fa-f]{4})"
         }
       ]
     },
     "number": {
       "name": "constant.numeric.asun",
-      "match": "-?\\b[0-9]+(\\.[0-9]+)?\\b"
+      "match": "-?(?:[0-9]+\\.[0-9]+(?:[eE][+-]?[0-9]+)?|[0-9]+[eE][+-]?[0-9]+|[0-9]+)(?=$|[\\s,\\]\\)])"
     },
     "boolean": {
       "name": "constant.language.boolean.asun",
@@ -127,7 +128,7 @@
     },
     "plain-string": {
       "name": "string.unquoted.asun",
-      "match": "[a-zA-Z_][a-zA-Z0-9_.@#$%&*!?~+-]*"
+      "match": "(?:\\\\(?:[\\\\\",ntrbf(),\\[\\]{}:@]|u[0-9A-Fa-f]{4})|/(?!\\*)|[^\\s,()\\[\\]{}:@\"\\\\/])(?:\\\\(?:[\\\\\",ntrbf(),\\[\\]{}:@]|u[0-9A-Fa-f]{4})|/(?!\\*)|[^,()\\[\\]{}:@\"\\\\/])*"
     },
     "operators": {
       "patterns": [

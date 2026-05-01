@@ -4,7 +4,14 @@ Complete reference for the current ASUN text syntax.
 
 ## Document Shapes
 
-Single row:
+ASUN text has four top-level shapes:
+
+- schema object: `{schema}:(values)`
+- schema object array: `[{schema}]:(values),(values)`
+- plain array: `[value, value]`
+- bare value: `value`
+
+Single object:
 
 ```asun
 {id@int, name@str}:(1, Alice)
@@ -60,14 +67,16 @@ Simple names may be unquoted:
 {id, name, active}
 ```
 
+Bare field names may contain only ASCII letters, digits, and `_`. Digits may appear at the start.
+
 Quoted field names are required when a field name:
 
 - contains spaces
-- starts with digits
+- contains `+`, `-`, `.`, or other punctuation
 - contains syntax characters such as `{ } [ ] @ "`
 
 ```asun
-{"id uuid"@int, "65"@bool, "{}[]@\""@str}
+{65@bool, "id uuid"@int, "a+b"@str, "{}[]@\""@str}
 ```
 
 ## Data
@@ -102,7 +111,13 @@ Inline object literals are not part of the current format.
 3.14
 -0.5
 1e10
+1.5e-3
+-1.0E+100
 ```
+
+Floats require digits before the decimal point. If a decimal point is present, it must have at least one digit after it. Exponents use `e` or `E` with optional `+`/`-`.
+
+These are plain strings, not numbers: `.5`, `5.`, `+5`, `1e`, `1e+`.
 
 ### `bool`
 
@@ -113,11 +128,14 @@ false
 
 ### null / optional
 
-An empty slot means null / absent:
+An empty slot inside a tuple or array means null / absent:
 
 ```asun
 {id@int, label@str}:(1, )
+[1,,3]
 ```
+
+A trailing comma is absorbed; it does not add a null. Use a doubled comma for a final null: `(a,b,,)`.
 
 ## Strings
 
@@ -133,10 +151,12 @@ hello world
 Rules:
 
 - outer whitespace is trimmed
-- reserved syntax characters should be quoted instead
-- if a value contains `@`, quote it to avoid confusion with schema syntax
+- raw `, ( ) [ ] { } : @ " \` and control characters are not allowed
+- raw `/`, `<`, and `>` are allowed, but `/*` starts a block comment
+- quote or escape reserved syntax characters
 
 ```asun
+{path@str}:(path/to/file)
 {name@str}:("@Alice")
 ```
 
@@ -150,7 +170,7 @@ Use quotes when you need to preserve whitespace or include reserved characters:
 "line\nbreak"
 ```
 
-Supported escapes include `\"`, `\\`, `\n`, `\t`, and `\r`.
+Supported escapes are `\"`, `\\`, `\n`, `\t`, `\r`, `\b`, `\f`, `\,`, `\(`, `\)`, `\[`, `\]`, `\{`, `\}`, `\:`, `\@`, and `\uXXXX`.
 
 ## Arrays
 
@@ -178,7 +198,7 @@ Write keyed collections as entry lists:
 
 ## Comments
 
-ASUN supports block comments:
+ASUN supports block comments wherever optional whitespace is allowed:
 
 ```asun
 /* user list */
@@ -188,6 +208,8 @@ ASUN supports block comments:
 ```
 
 Line comments are not part of the format.
+
+Comments must not appear inside quoted strings, plain strings, numbers, booleans, tuples, or array literals. Conformance tests mark comments inside `(...)` and `[...]` as errors.
 
 ## Whitespace
 

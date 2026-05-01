@@ -12,6 +12,8 @@ For deeper detail, continue to:
 
 ASUN separates **schema** from **data**.
 
+The text format also permits plain arrays and bare scalar values for schema-less dynamic data, but schema objects and schema object arrays are the primary interchange form.
+
 Single value:
 
 ```asun
@@ -73,14 +75,16 @@ Simple field names may be unquoted:
 {id, name, active}
 ```
 
+Bare field names may contain only ASCII letters, digits, and `_`; digits are allowed at the start.
+
 Quoted field names are required when a field name:
 
 - contains spaces
-- starts with digits
+- contains `+`, `-`, `.`, or other punctuation
 - contains syntax characters such as `{ } [ ] @ "`
 
 ```asun
-{"id uuid"@int, "65"@bool, "{}[]@\""@str}
+{65@bool, "id uuid"@int, "a+b"@str, "{}[]@\""@str}
 ```
 
 ## Data Rules
@@ -111,7 +115,10 @@ Inline object literals in the data section are not part of the current format.
 3.14
 -0.5
 1e10
+1.5e-3
 ```
+
+Tokens such as `.5`, `5.`, `+5`, `1e`, and `1e+` are strings, not numbers.
 
 ### `bool`
 
@@ -122,11 +129,13 @@ false
 
 ### null / optional
 
-An empty slot means null / absent:
+An empty slot inside a tuple or array means null / absent:
 
 ```asun
 {id@int, label@str}:(1, )
 ```
+
+A trailing comma is ignored; a doubled comma adds a null. For example, `(a,b,)` has two values, while `(a,b,,)` has three.
 
 ## Strings
 
@@ -136,13 +145,15 @@ Unquoted strings:
 
 - work for simple values
 - are trimmed at the outer edges
-- should not contain reserved syntax characters
+- may contain raw `/`, `<`, and `>`
+- must not contain raw `, ( ) [ ] { } : @ " \` or control characters
+- treat `/*` as a block comment opener, not as string content
 
 Quoted strings:
 
 - preserve whitespace
 - allow reserved characters
-- support escapes such as `\"`, `\\`, `\n`, `\t`, and `\r`
+- support escapes such as `\"`, `\\`, `\n`, `\t`, `\r`, `\b`, `\f`, structural escapes, and `\uXXXX`
 
 Examples:
 
@@ -153,7 +164,7 @@ Alice
 "value with, comma"
 ```
 
-In schema, `@` is structural syntax. In data, `@` is ordinary content. To avoid ambiguity, values containing `@` should be quoted:
+In schema, `@` is structural syntax. In unquoted data strings, raw `@` is reserved, so values containing `@` should be quoted or escaped:
 
 ```asun
 {name@str}:("@Alice")
@@ -161,7 +172,7 @@ In schema, `@` is structural syntax. In data, `@` is ordinary content. To avoid 
 
 ## Comments
 
-ASUN supports block comments:
+ASUN supports block comments wherever optional whitespace is allowed:
 
 ```asun
 /* user list */
@@ -171,6 +182,8 @@ ASUN supports block comments:
 ```
 
 Line comments are not part of the format.
+
+Comments inside tuples `(...)` or array literals `[...]` are not valid conformance inputs.
 
 ## Binary Note
 

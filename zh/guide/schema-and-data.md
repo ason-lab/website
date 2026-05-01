@@ -67,16 +67,16 @@ name@type
 
 ## 字段名
 
-简单字段名可以直接写：
+简单字段名只能包含 ASCII 字母、数字和 `_`：
 
 ```asun
-{id, name, active}
+{id, name, active, 65}
 ```
 
-如果字段名包含空格、以数字开头、或包含语法字符，就必须加引号：
+如果字段名包含空格、`+`、`-`、`.` 或语法字符，就必须加引号：
 
 ```asun
-{"id uuid"@int, "65"@bool, "{}[]@\""@str}
+{"id uuid"@int, "a+b"@str, "{}[]@\""@str}
 ```
 
 ## 数据规则
@@ -99,7 +99,10 @@ name@type
 
 ```asun
 {id@int, score@float}:(1, )
+[1,,3]
 ```
+
+尾随逗号不会创建 null。末尾 null 需要连续逗号：`(a,b,,)`。
 
 ## ASUN 当前不做什么
 
@@ -126,7 +129,7 @@ type     = "int" | "float" | "str" | "bool" | schema | "[" type "]"
 rows     = tuple ("," tuple)*
 tuple    = "(" values ")"
 values   = value ("," value)*
-value    = scalar | tuple | "[" values "]" | ""
+value    = scalar | tuple | "[" values "]" | empty
 ```
 
 完整的字符串、转义、空白与注释规则见 [语法参考](/zh/reference/syntax)。
